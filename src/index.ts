@@ -19,7 +19,10 @@ export async function isDir(dirname: string): Promise<boolean> {
     }
 }
 
-export async function lsDir(dirname: string, filesOnly: boolean = false) {
+export async function lsDir(
+    dirname: string,
+    filesOnly: boolean = false
+): Promise<string[]> {
     const found = await isDir(dirname)
 
     if (!found) {
@@ -43,6 +46,21 @@ export async function lsDir(dirname: string, filesOnly: boolean = false) {
     }
 
     return files
+}
+
+export async function countDir(
+    dirname: string,
+    filesOnly: boolean = false
+): Promise<number> {
+    const found = await isDir(dirname)
+
+    if (!found) {
+        throw new Error(`Directory not found: ${dirname}`)
+    }
+
+    const elems = await lsDir(dirname, filesOnly)
+
+    return elems.length
 }
 
 export async function moveFile(src: PathLike, dst: PathLike): Promise<boolean> {
