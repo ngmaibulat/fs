@@ -1,9 +1,9 @@
 import assert from 'node:assert'
 import test from 'node:test'
-import { isDir } from '../index.js'
+import { isDir } from '../dir.js'
 
 test('test src dir exists', async () => {
-    const res = await isDir('./queue')
+    const res = await isDir('./src')
     assert.equal(res, true)
 })
 
