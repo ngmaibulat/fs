@@ -14,7 +14,12 @@ export type UserData = {
 export type FileStat = {
     filename: string;
     stat: Stats;
-    filetype: string;
+    filetype?: string;
     userinfo?: UserData;
     groupinfo?: posix.Group;
+};
+
+export type DirContents = {
+    dirs: FileStat[];
+    files: FileStat[];
 };

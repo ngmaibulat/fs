@@ -6,7 +6,8 @@ import isFile from '@aibulat/isfile';
 import { passwdUser } from 'passwd-user';
 
 import { getFileType } from './fileType.js';
-import { FileStat } from './types.js';
+import { FileStat, DirContents } from './types.js';
+import { Dirent } from 'node:fs';
 
 async function isDir(dirname: string): Promise<boolean> {
     if (!dirname) {
@@ -50,27 +51,64 @@ async function lsDir(dirname: string, filesOnly: boolean = false): Promise<strin
     return files;
 }
 
-async function lsDirEx(dirname: string, filesOnly: boolean = false): Promise<FileStat[]> {
-    const files = await lsDir(dirname, filesOnly);
-    const res: FileStat[] = [];
+async function lsDirWithDetails(dirname: string, filesOnly: boolean = false): Promise<Dirent[]> {
+    const found = await isDir(dirname);
 
-    for (const file of files) {
-        const st = await fs.stat(file);
-        const userinfo = await passwdUser(st.uid);
-        const filetype = getFileType(file);
-
-        const groupinfo = posix.getgrnam(st.gid);
-
-        res.push({
-            filename: file,
-            stat: st,
-            filetype,
-            userinfo,
-            groupinfo,
-        });
+    if (!found) {
+        throw new Error(`Directory not found: ${dirname}`);
     }
 
-    return res;
+    const files = await fs.readdir(dirname, { withFileTypes: true });
+
+    if (filesOnly) {
+        const res = [];
+
+        for (const item of files) {
+            const rpath = path.resolve(dirname, item.name);
+            if (item.isFile()) {
+                res.push(item);
+            }
+        }
+
+        return res;
+    }
+
+    return files;
+}
+
+async function lsDirEx(dirname: string, filesOnly: boolean = false): Promise<DirContents> {
+    const entries = await lsDirWithDetails(dirname, filesOnly);
+    const files: FileStat[] = [];
+    const dirs: FileStat[] = [];
+
+    for (const file of entries) {
+        const st = await fs.stat(file.name);
+        const userinfo = await passwdUser(st.uid);
+        const groupinfo = posix.getgrnam(st.gid);
+
+        if (file.isDirectory()) {
+            dirs.push({
+                filename: file.name,
+                stat: st,
+                userinfo,
+                groupinfo,
+            });
+        }
+        //Not a Directory
+        else {
+            const filetype = getFileType(file.name);
+
+            files.push({
+                filename: file.name,
+                stat: st,
+                filetype,
+                userinfo,
+                groupinfo,
+            });
+        }
+    }
+
+    return { dirs, files };
 }
 
 async function countDir(dirname: string, filesOnly: boolean = false): Promise<number> {
