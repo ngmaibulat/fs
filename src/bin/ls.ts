@@ -1,5 +1,6 @@
 import cliTable from 'cli-table3';
 import color from '@colors/colors';
+import { HorizontalAlignment } from 'cli-table3';
 
 import { lsDirEx } from '../dir.js';
 import { FileStat, DirContents } from '../types.js';
@@ -17,11 +18,13 @@ export function formatDate(d: Date) {
 }
 
 export function formatTable(data: DirContents): string {
+    const alignRight: HorizontalAlignment = 'right';
+    const alignLeft: HorizontalAlignment = 'left';
     //make footer
     const len = data.dirs.length + data.files.length;
     const footer = [
-        { colSpan: 8, content: 'Total', hAlign: 'right' },
-        { content: len.toString(), hAlign: 'right' },
+        { colSpan: 8, content: 'Total', hAlign: alignRight },
+        { content: len.toString(), hAlign: alignRight },
     ];
 
     const table = new cliTable({
@@ -52,7 +55,7 @@ export function formatTable(data: DirContents): string {
             color.yellow(formatDate(row.stat.mtime)), //modified
             color.yellow(formatDate(row.stat.atime)), //accessed
             // color.yellow(permString), //mode
-            { content: color.yellow(permString), hAlign: 'right' }, //mode
+            { content: color.yellow(permString), hAlign: alignRight }, //mode
         ];
         //@ts-ignore
         table.push(arr);
@@ -66,11 +69,11 @@ export function formatTable(data: DirContents): string {
             color.yellow(row.userinfo?.username || ''),
             color.yellow(row.groupinfo?.name || ''),
             // color.yellow(row.stat.size.toString()),
-            { content: row.stat.size.toString(), hAlign: 'right' },
+            { content: row.stat.size.toString(), hAlign: alignRight },
             color.yellow(formatDate(row.stat.birthtime)), //created
             color.yellow(formatDate(row.stat.mtime)), //modified
             color.yellow(formatDate(row.stat.atime)), //accessed
-            { content: color.yellow(permString), hAlign: 'right' }, //mode
+            { content: color.yellow(permString), hAlign: alignRight }, //mode
         ];
         //@ts-ignore
         table.push(arr);
