@@ -7,7 +7,7 @@ import { passwdUser } from 'passwd-user';
 
 import { getFileType } from './fileType.js';
 import { FileStat, DirContents } from './types.js';
-import { Dirent } from 'node:fs';
+import { Dirent, PathLike } from 'node:fs';
 
 async function isDir(dirname: string): Promise<boolean> {
     if (!dirname) {
@@ -76,13 +76,30 @@ async function lsDirWithDetails(dirname: string, filesOnly: boolean = false): Pr
     return files;
 }
 
+export async function stat(path: PathLike) {
+    try {
+        return await fs.stat(path);
+    } catch (err: any) {
+        return false;
+    }
+}
+
 async function lsDirEx(dirname: string, filesOnly: boolean = false): Promise<DirContents> {
     const entries = await lsDirWithDetails(dirname, filesOnly);
     const files: FileStat[] = [];
     const dirs: FileStat[] = [];
 
+    // console.log(entries);
+    // process.exit(1);
+
     for (const file of entries) {
-        const st = await fs.stat(file.name);
+        const rpath = path.resolve(dirname, file.name);
+        const st = await stat(rpath);
+
+        if (!st) {
+            continue;
+        }
+
         const userinfo = await passwdUser(st.uid);
         const groupinfo = posix.getgrnam(st.gid);
 
@@ -96,7 +113,7 @@ async function lsDirEx(dirname: string, filesOnly: boolean = false): Promise<Dir
         }
         //Not a Directory
         else {
-            const filetype = getFileType(file.name);
+            const filetype = getFileType(rpath);
 
             files.push({
                 filename: file.name,

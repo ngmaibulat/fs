@@ -2,8 +2,10 @@ import cliTable from 'cli-table3';
 import color from '@colors/colors';
 import { HorizontalAlignment } from 'cli-table3';
 
-import { lsDirEx } from '../dir.js';
-import { FileStat, DirContents } from '../types.js';
+import { isDir } from '../../dir.js';
+import { lsDirEx } from '../../dir.js';
+import { FileStat, DirContents } from '../../types.js';
+import { LsOptions } from '../types.js';
 
 export function formatDate(d: Date) {
     const year = d.getFullYear();
@@ -84,7 +86,20 @@ export function formatTable(data: DirContents): string {
     return table.toString();
 }
 
-const data = await lsDirEx('.');
-const out = formatTable(data);
+export async function actionLs(options: LsOptions) {
+    let dirname = '.';
 
-console.log(out);
+    if (options.dir) {
+        const found = await isDir(options.dir);
+        if (!found) {
+            console.error('Directory not found: ', options.dir);
+            process.exit(1);
+        }
+
+        dirname = options.dir;
+    }
+
+    const data = await lsDirEx(dirname);
+    const out = formatTable(data);
+    console.log(out);
+}
