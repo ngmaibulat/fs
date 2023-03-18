@@ -3,6 +3,7 @@
 import { Command, Option } from 'commander';
 import { actionHelpChmod } from './actions/help-chmod.js';
 import { actionLs } from './actions/ls.js';
+import { actionHash } from './actions/hash.js';
 
 const program = new Command();
 
@@ -25,6 +26,12 @@ program
     // .option('--format', 'Format', 'cli')
     .option('-d, --dir <dir>', 'show <dir>')
     .action(actionLs);
+
+program
+    .command('hashes')
+    .description('show hashes. can be very resourse intensive')
+    .option('-d, --dir <dir>', 'show hashes for files in <dir>')
+    .action(actionHash);
 
 program.parse();
 

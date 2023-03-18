@@ -7,17 +7,7 @@ import { lsDirEx } from '../../dir.js';
 import { FileStat, DirContents } from '../../types.js';
 import { LsOptions } from '../types.js';
 
-export function formatDate(d: Date) {
-    const year = d.getFullYear();
-    const month = d.getMonth().toString().padStart(2, '0');
-    const day = d.getDay().toString().padStart(2, '0');
-    const hour = d.getHours().toString().padStart(2, '0');
-    const min = d.getMinutes().toString().padStart(2, '0');
-    const sec = d.getSeconds().toString().padStart(2, '0');
-    const msec = d.getMilliseconds().toString().padStart(3, '0');
-
-    return `${year}-${month}-${day} ${hour}:${min}`;
-}
+import { formatDate } from '../date.js';
 
 export function formatTable(data: DirContents): string {
     const alignRight: HorizontalAlignment = 'right';
